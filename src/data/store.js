@@ -9,7 +9,8 @@ const store = reactive({
   user: {},
   achievements: [],
   points: 0,
-  claimedChallenges: []
+  claimedChallenges: [],
+  redemptions: []
 })
 
 const STORE_MAP = {
@@ -20,7 +21,8 @@ const STORE_MAP = {
   user: () => controllers.user.loadUser(),
   achievements: () => controllers.achievement.loadAchievements(),
   points: () => controllers.challenge.getPoints(),
-  claimedChallenges: () => controllers.challenge.loadClaimed()
+  claimedChallenges: () => controllers.challenge.loadClaimed(),
+  redemptions: () => controllers.redemption.loadRedemptions()
 }
 
 export function refresh() {

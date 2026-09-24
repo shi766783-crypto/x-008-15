@@ -12,9 +12,12 @@
       <div class="profile-meta">
         <div class="profile-name">{{ store.user.name || '我的家庭' }}</div>
         <div class="profile-sub">成员：{{ memberCount }} 人 · 加入于 {{ joinDate }}</div>
+        <div class="profile-titles" v-if="redeemedTitles.length">
+          <span v-for="t in redeemedTitles" :key="t.id" class="title-tag">{{ t.icon }} {{ t.name }}</span>
+        </div>
       </div>
       <div class="profile-stat">
-        <span>累计积分</span>
+        <span>当前积分</span>
         <b>{{ store.points }}</b>
       </div>
     </div>
@@ -67,6 +70,17 @@
       </div>
     </section>
 
+    <section v-if="redeemedItems.length">
+      <h3 class="block-title">兑换的称号与徽章</h3>
+      <div class="badges-row">
+        <div v-for="item in redeemedItems" :key="item.id" class="mini-badge redeemed" :title="item.desc">
+          <span class="mini-badge-icon">{{ item.icon }}</span>
+          <span>{{ item.name }}</span>
+          <span class="kind-tag">{{ item.type === 'title' ? '称号' : '徽章' }}</span>
+        </div>
+      </div>
+    </section>
+
     <section>
       <h3 class="block-title">成就徽章（{{ store.achievements.length }}/{{ totalBadges }}）</h3>
       <div class="badges-row">
@@ -86,11 +100,17 @@ import { money } from '../core/utils.js'
 import { BUDGET_WARN_RATIO, TRANSACTION_TYPES } from '../core/constants.js'
 
 const store = useStore()
-const { achievement } = controllersApi
+const { achievement, redemption } = controllersApi
 
 const allBadges = computed(() => achievement.ACHIEVEMENTS)
 const totalBadges = computed(() => allBadges.value.length)
 const owned = (id) => store.achievements.some((a) => a.id === id)
+
+const redeemedItems = computed(() => {
+  const ownedIds = new Set((store.redemptions || []).map((r) => r.itemId))
+  return redemption.REDEMPTION_ITEMS.filter((i) => ownedIds.has(i.id))
+})
+const redeemedTitles = computed(() => redeemedItems.value.filter((i) => i.type === 'title'))
 
 const memberCount = 4
 const joinDate = store.user.createdAt ? new Date(store.user.createdAt).toLocaleDateString('zh-CN') : '—'
@@ -260,5 +280,31 @@ const goalRows = computed(() =>
 .mini-badge.locked {
   filter: grayscale(1);
   opacity: 0.5;
+}
+.mini-badge.redeemed {
+  border-color: rgba(224, 155, 45, 0.4);
+  background: rgba(240, 201, 87, 0.1);
+}
+.kind-tag {
+  font-size: 10px;
+  color: #b8860b;
+  background: rgba(240, 201, 87, 0.18);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.profile-titles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.title-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b8860b;
+  background: rgba(240, 201, 87, 0.18);
+  border: 1px solid rgba(224, 155, 45, 0.35);
+  border-radius: 999px;
+  padding: 2px 10px;
 }
 </style>

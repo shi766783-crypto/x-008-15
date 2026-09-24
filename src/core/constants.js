@@ -33,5 +33,6 @@ export const STORAGE_KEYS = {
   achievements: 'ffm.achievements',
   points: 'ffm.points',
   claimedChallenges: 'ffm.claimedChallenges',
+  redemptions: 'ffm.redemptions',
   seedFlag: 'ffm.seeded.v1'
 }

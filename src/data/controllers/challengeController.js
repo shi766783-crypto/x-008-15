@@ -16,6 +16,13 @@ export function grantPoints(points) {
   storage.setJSON(STORAGE_KEYS.points, loadPoints() + points)
 }
 
+export function spendPoints(points) {
+  const current = loadPoints()
+  if (current < points) return false
+  storage.setJSON(STORAGE_KEYS.points, current - points)
+  return true
+}
+
 export function challengeViews() {
   const streak = computeCurrentStreak()
   return CHALLENGE_STREAKS.map((days) => ({

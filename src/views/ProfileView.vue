@@ -14,10 +14,22 @@
         <div class="profile-sub">成员：{{ memberCount }} 人 · 加入于 {{ joinDate }}</div>
       </div>
       <div class="profile-stat">
-        <span>累计积分</span>
+        <span>当前积分</span>
         <b>{{ store.points }}</b>
       </div>
     </div>
+
+    <section>
+      <h3 class="block-title">我的称号与徽章（{{ store.redemptions.length }}）</h3>
+      <div v-if="redeemedRewards.length" class="rewards-row">
+        <div v-for="r in redeemedRewards" :key="r.id" class="reward-chip" :class="r.type" :title="`${r.name} · ${r.points} 积分兑换`">
+          <span class="reward-chip-icon">{{ r.icon }}</span>
+          <span class="reward-chip-name">{{ r.name }}</span>
+          <span class="reward-chip-type">{{ r.type === 'title' ? '称号' : '徽章' }}</span>
+        </div>
+      </div>
+      <div v-else class="card empty">还没有兑换任何称号或徽章，去「积分兑换」挑选吧</div>
+    </section>
 
     <section v-if="store.accounts.length">
       <h3 class="block-title">我的账户</h3>
@@ -68,7 +80,7 @@
     </section>
 
     <section>
-      <h3 class="block-title">成就徽章（{{ store.achievements.length }}/{{ totalBadges }}）</h3>
+      <h3 class="block-title">成就徽章（记账解锁 {{ store.achievements.length }}/{{ totalBadges }}）</h3>
       <div class="badges-row">
         <div v-for="a in allBadges" :key="a.id" class="mini-badge" :class="{ locked: !owned(a.id) }" :title="a.desc">
           <span class="mini-badge-icon">{{ a.icon }}</span>
@@ -86,11 +98,16 @@ import { money } from '../core/utils.js'
 import { BUDGET_WARN_RATIO, TRANSACTION_TYPES } from '../core/constants.js'
 
 const store = useStore()
-const { achievement } = controllersApi
+const { achievement, reward } = controllersApi
 
 const allBadges = computed(() => achievement.ACHIEVEMENTS)
 const totalBadges = computed(() => allBadges.value.length)
 const owned = (id) => store.achievements.some((a) => a.id === id)
+const redeemedRewards = computed(() =>
+  [...store.redemptions]
+    .sort((a, b) => a.redeemedAt - b.redeemedAt)
+    .map((r) => reward.findReward(r.rewardId) || r)
+)
 
 const memberCount = 4
 const joinDate = store.user.createdAt ? new Date(store.user.createdAt).toLocaleDateString('zh-CN') : '—'
@@ -260,5 +277,41 @@ const goalRows = computed(() =>
 .mini-badge.locked {
   filter: grayscale(1);
   opacity: 0.5;
+}
+.rewards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.reward-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow);
+}
+.reward-chip.title {
+  border-color: rgba(79, 141, 249, 0.4);
+  background: linear-gradient(135deg, rgba(79, 141, 249, 0.1), var(--card-bg) 70%);
+}
+.reward-chip.badge {
+  border-color: rgba(232, 155, 45, 0.45);
+  background: linear-gradient(135deg, rgba(240, 201, 87, 0.14), var(--card-bg) 70%);
+}
+.reward-chip-icon { font-size: 20px; }
+.reward-chip-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+.reward-chip-type {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  padding: 1px 8px;
+  border-radius: 999px;
 }
 </style>

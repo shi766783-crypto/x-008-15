@@ -109,5 +109,6 @@ export function seedDemoData() {
   ])
 
   saveUser({ name: '我的家庭', createdAt: new Date().toISOString(), currency: 'CNY' })
+  storage.setJSON(STORAGE_KEYS.points, 300)
   storage.setJSON(STORAGE_KEYS.seedFlag, true)
 }
